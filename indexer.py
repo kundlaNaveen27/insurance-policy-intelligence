@@ -6,8 +6,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 from sentence_transformers import SentenceTransformer
 from langchain.embeddings.base import Embeddings
-import numpy as np
-
 load_dotenv()
 
 # ── CUSTOM EMBEDDING CLASS ──────────────────────────
@@ -24,6 +22,22 @@ class SentenceTransformerEmbeddings(Embeddings):
     def embed_query(self, text):
         # convert single question to numbers
         return self.model.encode([text])[0].tolist()
+
+
+def clear_index(index_name="insurance-policies"):
+    """
+    Deletes all vectors from the Pinecone index.
+    The index itself remains — only the stored documents are removed.
+    """
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    existing_indexes = [idx.name for idx in pc.list_indexes()]
+
+    if index_name in existing_indexes:
+        index = pc.Index(index_name)
+        index.delete(delete_all=True)
+        print(f"✅ Cleared all vectors from '{index_name}'")
+    else:
+        print(f"Index '{index_name}' does not exist — nothing to clear")
 
 
 def create_pinecone_index(index_name="insurance-policies"):

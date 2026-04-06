@@ -48,9 +48,11 @@ with st.sidebar:
         if st.button("📥 Index Uploaded Documents"):
             with st.spinner("Indexing documents into Pinecone..."):
 
-                # save uploaded files temporarily
                 import tempfile
-                from indexer import load_and_index_pdfs
+                from indexer import clear_index, load_and_index_pdfs
+
+                # clear old documents first so stale data doesn't mix in
+                clear_index()
 
                 # create temp folder
                 with tempfile.TemporaryDirectory() as tmp_dir:
@@ -63,10 +65,10 @@ with st.sidebar:
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getvalue())
 
-                    # index them into Pinecone
+                    # index new documents into Pinecone
                     load_and_index_pdfs(tmp_dir)
 
-                    # update session state
+                    # refresh session state
                     st.session_state.vectorstore, st.session_state.llm = initialize_rag()
 
             st.success(f"✅ Indexed {len(uploaded_files)} documents!")
@@ -102,6 +104,14 @@ with st.sidebar:
     if st.button("🗑️ Clear Chat History"):
         st.session_state.messages = []
         st.rerun()
+
+    if st.button("🗄️ Clear Index (Remove All Docs)"):
+        with st.spinner("Clearing Pinecone index..."):
+            from indexer import clear_index
+            clear_index()
+            st.session_state.vectorstore, st.session_state.llm = initialize_rag()
+            st.session_state.messages = []
+        st.success("✅ Index cleared! Upload new documents to get started.")
 
 # ── DISPLAY CHAT HISTORY ────────────────────────────
 for message in st.session_state.messages:
