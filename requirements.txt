@@ -3,7 +3,9 @@ langchain
 langchain-groq
 langchain-pinecone
 langchain-community
+langchain-text-splitters
 sentence-transformers
-pypdf2
+pypdf
 streamlit
 python-dotenv
+cryptography
