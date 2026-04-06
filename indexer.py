@@ -33,9 +33,13 @@ def clear_index(index_name="insurance-policies"):
     existing_indexes = [idx.name for idx in pc.list_indexes()]
 
     if index_name in existing_indexes:
-        index = pc.Index(index_name)
-        index.delete(delete_all=True)
-        print(f"✅ Cleared all vectors from '{index_name}'")
+        try:
+            index = pc.Index(index_name)
+            index.delete(delete_all=True)
+            print(f"✅ Cleared all vectors from '{index_name}'")
+        except Exception as e:
+            # Pinecone throws NotFoundException when index is already empty
+            print(f"Index was already empty or could not be cleared: {e}")
     else:
         print(f"Index '{index_name}' does not exist — nothing to clear")
 
